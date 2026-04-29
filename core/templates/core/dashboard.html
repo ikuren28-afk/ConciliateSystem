@@ -221,11 +221,11 @@
             </li>
         </ul>
         
-        {% if user.is_staff or user.groups.filter(name='Administrador').exists %}
+        {% if is_admin_user %}
         <div class="sidebar-heading mt-3">Administración</div>
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="{% url 'user_list' %}">
                     <i class="bi bi-people"></i> Usuarios
                 </a>
             </li>

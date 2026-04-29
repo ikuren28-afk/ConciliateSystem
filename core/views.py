@@ -45,9 +45,13 @@ def dashboard_view(request):
     unread_notifications = Notification.objects.filter(user=request.user, is_read=False)[:5]
     total_unread = Notification.objects.filter(user=request.user, is_read=False).count()
     
+    # Verificar permisos de rol para mostrar menú de administración
+    is_admin_user = request.user.groups.filter(name='Administrador').exists() or request.user.is_superuser
+    
     context = {
         'unread_notifications': unread_notifications,
         'total_unread': total_unread,
+        'is_admin_user': is_admin_user,
     }
     return render(request, 'core/dashboard.html', context)
 
