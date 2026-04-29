@@ -1,7 +1,8 @@
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django import forms
 from django.contrib.auth.models import User
-from .models import Office, BankAccount, Operation
+from django.core.exceptions import ValidationError
+from .models import Office, BankAccount, Operation, BankStatement
 
 
 class LoginForm(AuthenticationForm):
@@ -103,3 +104,46 @@ class OperationForm(forms.ModelForm):
             'code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Código'}),
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre'})
         }
+
+
+class BankStatementForm(forms.ModelForm):
+    """Formulario para cargar estados de cuenta bancario"""
+    
+    file = forms.FileField(
+        label='Archivo del estado de cuenta',
+        required=True,
+        help_text='Solo se permiten archivos .xml o .txt (máximo 5 MB)'
+    )
+    
+    class Meta:
+        model = BankStatement
+        fields = ['bank_account_id', 'statement_date', 'starting_balance', 'ending_balance', 
+                  'overdraft_balance', 'reserved_balance', 'available_balance', 'file']
+        widgets = {
+            'bank_account_id': forms.Select(attrs={'class': 'form-control'}),
+            'statement_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'starting_balance': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'ending_balance': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'overdraft_balance': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'reserved_balance': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'available_balance': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'file': forms.FileInput(attrs={'class': 'form-control'})
+        }
+    
+    def clean_file(self):
+        """Validar extensión y tamaño del archivo"""
+        file = self.cleaned_data.get('file')
+        if file:
+            # Validar extensión
+            allowed_extensions = ['.xml', '.txt']
+            file_extension = file.name.lower().split('.')[-1]
+            if f'.{file_extension}' not in allowed_extensions:
+                raise ValidationError('Solo se permiten archivos con extensión .xml o .txt')
+            
+            # Validar tamaño (5 MB = 5 * 1024 * 1024 bytes)
+            max_size = 5 * 1024 * 1024
+            if file.size > max_size:
+                raise ValidationError('El tamaño del archivo no puede superar los 5 MB')
+            
+            return file
+        return None

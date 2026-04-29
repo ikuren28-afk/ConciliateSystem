@@ -1,0 +1,141 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Estados de Cuenta - ConciliateSystem{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-file-invoice-dollar me-2"></i>Estados de Cuenta Bancario</h2>
+                {% if user.groups.filter(name='Administrador').exists() or user.groups.filter(name='Analista Financiero').exists() or user.is_superuser %}
+                <a href="{% url 'bank_statement_upload' %}" class="btn btn-primary">
+                    <i class="fas fa-upload me-2"></i>Cargar Estado de Cuenta
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes -->
+    {% if messages %}
+    <div class="row mb-3">
+        <div class="col-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Barra de búsqueda -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <form method="get" class="d-flex">
+                <input type="text" name="search" class="form-control me-2" 
+                       placeholder="Buscar por nombre de archivo..." 
+                       value="{{ search_query }}">
+                <button type="submit" class="btn btn-outline-secondary">
+                    <i class="fas fa-search"></i>
+                </button>
+                {% if search_query %}
+                <a href="{% url 'bank_statement_list' %}" class="btn btn-outline-danger ms-2">
+                    <i class="fas fa-times"></i>
+                </a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de estados de cuenta -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if page_obj %}
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Cuenta Bancaria</th>
+                            <th>Archivo</th>
+                            <th>Extensión</th>
+                            <th>Tamaño (KB)</th>
+                            <th>Fecha Estado</th>
+                            <th>Saldo Inicial</th>
+                            <th>Saldo Final</th>
+                            <th>Fecha Carga</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for statement in page_obj %}
+                        <tr>
+                            <td>{{ statement.id|truncatechars:8 }}</td>
+                            <td>{{ statement.bank_account_id.name }}</td>
+                            <td>{{ statement.file_name }}</td>
+                            <td><span class="badge bg-info">{{ statement.file_extension }}</span></td>
+                            <td>{{ statement.file_size|floatformat:2 }}</td>
+                            <td>{{ statement.statement_date|date:"d/m/Y" }}</td>
+                            <td>{{ statement.starting_balance|floatformat:2 }}</td>
+                            <td>{{ statement.ending_balance|floatformat:2 }}</td>
+                            <td>{{ statement.created_at|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                {% if user.groups.filter(name='Administrador').exists() or user.groups.filter(name='Analista Financiero').exists() or user.is_superuser %}
+                                <a href="{% url 'bank_statement_delete' statement.id %}" 
+                                   class="btn btn-sm btn-outline-danger" 
+                                   title="Eliminar">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            <nav aria-label="Paginación de estados de cuenta">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1&search={{ search_query }}">Primera</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}">Anterior</a>
+                    </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}">Siguiente</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&search={{ search_query }}">Última</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+                <h4>No hay estados de cuenta cargados</h4>
+                <p class="text-muted">Comienza cargando un estado de cuenta bancario.</p>
+                {% if user.groups.filter(name='Administrador').exists() or user.groups.filter(name='Analista Financiero').exists() or user.is_superuser %}
+                <a href="{% url 'bank_statement_upload' %}" class="btn btn-primary mt-3">
+                    <i class="fas fa-upload me-2"></i>Cargar Estado de Cuenta
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

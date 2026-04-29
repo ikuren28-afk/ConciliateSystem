@@ -54,6 +54,11 @@ urlpatterns = [
     path('operations/create/', views.operation_create_view, name='operation_create'),
     path('operations/<uuid:operation_id>/edit/', views.operation_edit_view, name='operation_edit'),
     path('operations/<uuid:operation_id>/delete/', views.operation_delete_view, name='operation_delete'),
+    
+    # Gestión de Estados de Cuenta (solo administradores y analistas financieros)
+    path('bank-statements/', views.bank_statement_list_view, name='bank_statement_list'),
+    path('bank-statements/upload/', views.bank_statement_upload_view, name='bank_statement_upload'),
+    path('bank-statements/<uuid:statement_id>/delete/', views.bank_statement_delete_view, name='bank_statement_delete'),
 ]
 
 if settings.DEBUG:
