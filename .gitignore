@@ -1,6 +1,1 @@
-```
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-```
+Nothing needs to be added to .gitignore since the changes only include HTML templates, Python source files, and configuration files without any build artifacts, dependencies, or temporary files that require ignoring.

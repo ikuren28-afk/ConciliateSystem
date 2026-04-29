@@ -206,7 +206,8 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link {% if request.resolver_match.url_name == 'bank_statement_list' %}active{% endif %}" 
+                   href="{% url 'bank_statement_list' %}">
                     <i class="bi bi-file-earmark-text"></i> Estados de Cuenta
                 </a>
             </li>

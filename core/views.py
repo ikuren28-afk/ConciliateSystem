@@ -4,7 +4,11 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.models import User, Group
-from .forms import LoginForm, CustomUserCreationForm
+from django.core.paginator import Paginator
+from django.core.files.storage import default_storage
+import os
+import uuid
+from .forms import LoginForm, CustomUserCreationForm, BankStatementForm
 from .models import Role, Office, BankAccount, Operation, BankStatement, BankStatementTransaction, Notification, AuditLog
 
 
@@ -451,3 +455,124 @@ def operation_delete_view(request, operation_id):
         return redirect('operation_list')
     
     return render(request, 'core/operation_delete.html', {'operation': operation})
+
+
+# ==================== Vistas para Estados de Cuenta Bancario ====================
+
+def is_admin_or_financial_analyst(user):
+    """Verifica si el usuario es administrador o analista financiero"""
+    return (user.groups.filter(name='Administrador').exists() or 
+            user.groups.filter(name='Analista Financiero').exists() or 
+            user.is_superuser)
+
+
+@login_required
+@user_passes_test(is_admin_or_financial_analyst, login_url='dashboard')
+def bank_statement_list_view(request):
+    """Listado de estados de cuenta (solo administradores y analistas financieros)"""
+    # Búsqueda
+    search_query = request.GET.get('search', '')
+    statements = BankStatement.objects.all().select_related('bank_account_id').order_by('-created_at')
+    
+    if search_query:
+        statements = statements.filter(file_name__icontains=search_query)
+    
+    # Paginación
+    paginator = Paginator(statements, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'search_query': search_query,
+    }
+    return render(request, 'core/bank_statement_list.html', context)
+
+
+@login_required
+@user_passes_test(is_admin_or_financial_analyst, login_url='dashboard')
+def bank_statement_upload_view(request):
+    """Cargar estado de cuenta bancario (solo administradores y analistas financieros)"""
+    if request.method == 'POST':
+        form = BankStatementForm(request.POST, request.FILES)
+        if form.is_valid():
+            bank_statement = form.save(commit=False)
+            
+            # Procesar archivo
+            uploaded_file = form.cleaned_data.get('file')
+            file_extension = uploaded_file.name.lower().split('.')[-1]
+            
+            # Generar nombre único para el archivo
+            unique_filename = f"{uuid.uuid4()}_{uploaded_file.name}"
+            
+            # Guardar archivo en MEDIA_ROOT
+            file_path = default_storage.save(f'bank_statements/{unique_filename}', uploaded_file)
+            
+            # Actualizar campos del modelo
+            bank_statement.file_name = uploaded_file.name
+            bank_statement.file_extension = file_extension
+            bank_statement.file_size = uploaded_file.size / 1024  # KB
+            
+            bank_statement.save()
+            
+            # Crear registro de auditoría
+            AuditLog.objects.create(
+                user=request.user,
+                action='CREATE',
+                model_name='BankStatement',
+                object_id=bank_statement.id,
+                changes=f'Estado de cuenta {uploaded_file.name} subido por {request.user.username}'
+            )
+            
+            # Crear notificación
+            Notification.objects.create(
+                user=request.user,
+                type='info',
+                content=f'Estado de cuenta "{uploaded_file.name}" cargado exitosamente.'
+            )
+            
+            messages.success(request, f'Estado de cuenta "{uploaded_file.name}" cargado exitosamente.')
+            return redirect('bank_statement_list')
+        else:
+            messages.error(request, 'Error al cargar el estado de cuenta. Verifique los datos.')
+    else:
+        form = BankStatementForm()
+    
+    return render(request, 'core/bank_statement_upload.html', {'form': form})
+
+
+@login_required
+@user_passes_test(is_admin_or_financial_analyst, login_url='dashboard')
+def bank_statement_delete_view(request, statement_id):
+    """Eliminar estado de cuenta (solo administradores y analistas financieros)"""
+    statement = get_object_or_404(BankStatement, pk=statement_id)
+    
+    if request.method == 'POST':
+        file_name = statement.file_name
+        
+        # Eliminar archivo físico
+        if statement.file_name:
+            try:
+                file_path = f'bank_statements/'
+                files = default_storage.listdir(file_path)[1]
+                for f in files:
+                    if f.endswith(statement.file_name.split('_')[-1]) if '_' in statement.file_name else f == statement.file_name:
+                        default_storage.delete(os.path.join(file_path, f))
+                        break
+            except Exception:
+                pass  # Continuar incluso si falla la eliminación del archivo
+        
+        statement.delete()
+        
+        # Crear registro de auditoría
+        AuditLog.objects.create(
+            user=request.user,
+            action='DELETE',
+            model_name='BankStatement',
+            changes=f'Estado de cuenta {file_name} eliminado por {request.user.username}'
+        )
+        
+        messages.success(request, f'Estado de cuenta "{file_name}" eliminado exitosamente.')
+        return redirect('bank_statement_list')
+    
+    return render(request, 'core/bank_statement_delete.html', {'statement': statement})

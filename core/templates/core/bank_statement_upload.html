@@ -1,0 +1,203 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Cargar Estado de Cuenta - ConciliateSystem{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-upload me-2"></i>Cargar Estado de Cuenta Bancario</h2>
+        </div>
+    </div>
+
+    <!-- Mensajes -->
+    {% if messages %}
+    <div class="row mb-3">
+        <div class="col-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Información del Estado de Cuenta</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.bank_account_id.id_for_label }}" class="form-label">
+                                <i class="fas fa-university me-1"></i>Cuenta Bancaria *
+                            </label>
+                            {{ form.bank_account_id }}
+                            {% if form.bank_account_id.errors %}
+                            <div class="text-danger small mt-1">{{ form.bank_account_id.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.statement_date.id_for_label }}" class="form-label">
+                                <i class="fas fa-calendar-alt me-1"></i>Fecha del Estado *
+                            </label>
+                            {{ form.statement_date }}
+                            {% if form.statement_date.errors %}
+                            <div class="text-danger small mt-1">{{ form.statement_date.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.starting_balance.id_for_label }}" class="form-label">
+                                    <i class="fas fa-money-bill-wave me-1"></i>Saldo Inicial *
+                                </label>
+                                {{ form.starting_balance }}
+                                {% if form.starting_balance.errors %}
+                                <div class="text-danger small mt-1">{{ form.starting_balance.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.ending_balance.id_for_label }}" class="form-label">
+                                    <i class="fas fa-money-bill-wave me-1"></i>Saldo Final *
+                                </label>
+                                {{ form.ending_balance }}
+                                {% if form.ending_balance.errors %}
+                                <div class="text-danger small mt-1">{{ form.ending_balance.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.overdraft_balance.id_for_label }}" class="form-label">
+                                    <i class="fas fa-minus-circle me-1"></i>Saldo Sobregiro
+                                </label>
+                                {{ form.overdraft_balance }}
+                                {% if form.overdraft_balance.errors %}
+                                <div class="text-danger small mt-1">{{ form.overdraft_balance.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.reserved_balance.id_for_label }}" class="form-label">
+                                    <i class="fas fa-lock me-1"></i>Saldo Reservado
+                                </label>
+                                {{ form.reserved_balance }}
+                                {% if form.reserved_balance.errors %}
+                                <div class="text-danger small mt-1">{{ form.reserved_balance.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.available_balance.id_for_label }}" class="form-label">
+                                    <i class="fas fa-wallet me-1"></i>Saldo Disponible
+                                </label>
+                                {{ form.available_balance }}
+                                {% if form.available_balance.errors %}
+                                <div class="text-danger small mt-1">{{ form.available_balance.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.file.id_for_label }}" class="form-label">
+                                <i class="fas fa-file-upload me-1"></i>Archivo del Estado de Cuenta *
+                            </label>
+                            {{ form.file }}
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Solo se permiten archivos con extensión .xml o .txt. Tamaño máximo: 5 MB.
+                            </div>
+                            {% if form.file.errors %}
+                            <div class="text-danger small mt-1">{{ form.file.errors }}</div>
+                            {% endif %}
+                            <div id="fileInfo" class="mt-2"></div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'bank_statement_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Volver al Listado
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-2"></i>Cargar Estado de Cuenta
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Información</h5>
+                </div>
+                <div class="card-body">
+                    <h6><i class="fas fa-check-circle text-success me-2"></i>Requisitos del Archivo</h6>
+                    <ul class="small">
+                        <li>Extensión permitida: <strong>.xml</strong> o <strong>.txt</strong></li>
+                        <li>Tamaño máximo: <strong>5 MB</strong></li>
+                        <li>El archivo debe contener las transacciones del estado de cuenta</li>
+                    </ul>
+
+                    <h6 class="mt-4"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Importante</h6>
+                    <ul class="small">
+                        <li>Verifique que la fecha del estado sea correcta</li>
+                        <li>Los saldos deben coincidir con el documento bancario</li>
+                        <li>Una vez cargado, podrá conciliar las transacciones</li>
+                    </ul>
+
+                    <h6 class="mt-4"><i class="fas fa-shield-alt text-primary me-2"></i>Seguridad</h6>
+                    <p class="small">
+                        Los archivos se almacenan de forma segura y solo personal autorizado puede acceder a ellos.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Validación en frontend del archivo
+document.getElementById('{{ form.file.id_for_label }}').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const fileInfo = document.getElementById('fileInfo');
+    
+    if (file) {
+        // Validar extensión
+        const fileName = file.name.toLowerCase();
+        const validExtensions = ['.xml', '.txt'];
+        const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+        
+        // Validar tamaño (5 MB = 5 * 1024 * 1024 bytes)
+        const maxSize = 5 * 1024 * 1024;
+        const isValidSize = file.size <= maxSize;
+        
+        let message = '<div class="';
+        if (hasValidExtension && isValidSize) {
+            message += 'alert alert-success">';
+            message += `<i class="fas fa-check-circle me-2"></i>Archivo válido: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+        } else {
+            message += 'alert alert-danger">';
+            if (!hasValidExtension) {
+                message += '<i class="fas fa-times-circle me-2"></i>Extensión no válida. Solo se permiten .xml o .txt<br>';
+            }
+            if (!isValidSize) {
+                message += `<i class="fas fa-times-circle me-2"></i>El archivo es demasiado grande. Máximo 5 MB (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+            }
+        }
+        message += '</div>';
+        
+        fileInfo.innerHTML = message;
+    } else {
+        fileInfo.innerHTML = '';
+    }
+});
+</script>
+{% endblock %}
