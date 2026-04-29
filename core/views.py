@@ -482,9 +482,17 @@ def bank_statement_list_view(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
+    # Verificar permisos para mostrar botones de acción
+    is_admin_user = request.user.groups.filter(name='Administrador').exists() or request.user.is_superuser
+    is_financial_analyst_user = request.user.groups.filter(name='Analista Financiero').exists() or request.user.is_superuser
+    can_manage_statements = is_admin_user or is_financial_analyst_user
+
     context = {
         'page_obj': page_obj,
         'search_query': search_query,
+        'is_admin_user': is_admin_user,
+        'is_financial_analyst_user': is_financial_analyst_user,
+        'can_manage_statements': can_manage_statements,
     }
     return render(request, 'core/bank_statement_list.html', context)
 

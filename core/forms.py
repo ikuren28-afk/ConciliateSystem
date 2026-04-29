@@ -117,10 +117,10 @@ class BankStatementForm(forms.ModelForm):
     
     class Meta:
         model = BankStatement
-        fields = ['bank_account_id', 'statement_date', 'starting_balance', 'ending_balance', 
+        fields = ['bank_account', 'statement_date', 'starting_balance', 'ending_balance',
                   'overdraft_balance', 'reserved_balance', 'available_balance', 'file']
         widgets = {
-            'bank_account_id': forms.Select(attrs={'class': 'form-control'}),
+            'bank_account': forms.Select(attrs={'class': 'form-control'}),
             'statement_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'starting_balance': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'ending_balance': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),

@@ -1,4 +1,4 @@
-{% extends 'core/base.html' %}
+{% extends 'core/dashboard.html' %}
 
 {% block title %}Eliminar Estado de Cuenta - ConciliateSystem{% endblock %}
 
@@ -42,7 +42,7 @@
                         <tbody>
                             <tr>
                                 <th class="bg-light" style="width: 30%;">Cuenta Bancaria:</th>
-                                <td>{{ statement.bank_account_id.name }}</td>
+                                <td>{{ statement.bank_account.name }}</td>
                             </tr>
                             <tr>
                                 <th class="bg-light">Archivo:</th>

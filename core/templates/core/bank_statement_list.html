@@ -1,4 +1,4 @@
-{% extends 'core/base.html' %}
+{% extends 'core/dashboard.html' %}
 
 {% block title %}Estados de Cuenta - ConciliateSystem{% endblock %}
 
@@ -8,7 +8,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <h2><i class="fas fa-file-invoice-dollar me-2"></i>Estados de Cuenta Bancario</h2>
-                {% if user.groups.filter(name='Administrador').exists() or user.groups.filter(name='Analista Financiero').exists() or user.is_superuser %}
+                {% if can_manage_statements %}
                 <a href="{% url 'bank_statement_upload' %}" class="btn btn-primary">
                     <i class="fas fa-upload me-2"></i>Cargar Estado de Cuenta
                 </a>
@@ -74,7 +74,7 @@
                         {% for statement in page_obj %}
                         <tr>
                             <td>{{ statement.id|truncatechars:8 }}</td>
-                            <td>{{ statement.bank_account_id.name }}</td>
+                            <td>{{ statement.bank_account.name }}</td>
                             <td>{{ statement.file_name }}</td>
                             <td><span class="badge bg-info">{{ statement.file_extension }}</span></td>
                             <td>{{ statement.file_size|floatformat:2 }}</td>
@@ -83,7 +83,7 @@
                             <td>{{ statement.ending_balance|floatformat:2 }}</td>
                             <td>{{ statement.created_at|date:"d/m/Y H:i" }}</td>
                             <td>
-                                {% if user.groups.filter(name='Administrador').exists() or user.groups.filter(name='Analista Financiero').exists() or user.is_superuser %}
+                                {% if can_manage_statements %}
                                 <a href="{% url 'bank_statement_delete' statement.id %}" 
                                    class="btn btn-sm btn-outline-danger" 
                                    title="Eliminar">
@@ -128,7 +128,7 @@
                 <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
                 <h4>No hay estados de cuenta cargados</h4>
                 <p class="text-muted">Comienza cargando un estado de cuenta bancario.</p>
-                {% if user.groups.filter(name='Administrador').exists() or user.groups.filter(name='Analista Financiero').exists() or user.is_superuser %}
+                {% if can_manage_statements %}
                 <a href="{% url 'bank_statement_upload' %}" class="btn btn-primary mt-3">
                     <i class="fas fa-upload me-2"></i>Cargar Estado de Cuenta
                 </a>
