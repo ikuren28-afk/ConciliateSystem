@@ -26,6 +26,16 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
+    
+    # Gestión de usuarios (solo administradores)
+    path('users/register/', views.register_user_view, name='register_user'),
+    path('users/', views.user_list_view, name='user_list'),
+    path('users/<uuid:user_id>/edit/', views.edit_user_view, name='edit_user'),
+    path('users/<uuid:user_id>/delete/', views.delete_user_view, name='delete_user'),
+    
+    # Notificaciones
+    path('notifications/<uuid:notification_id>/read/', views.mark_notification_read_view, name='mark_notification_read'),
+    path('notifications/read-all/', views.mark_all_notifications_read_view, name='mark_all_notifications_read'),
 ]
 
 if settings.DEBUG:
