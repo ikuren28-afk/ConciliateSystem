@@ -150,20 +150,39 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown">
                         <i class="bi bi-bell"></i>
-                        <span class="badge bg-danger notification-badge">3</span>
+                        {% if total_unread > 0 %}
+                        <span class="badge bg-danger notification-badge">{{ total_unread }}</span>
+                        {% endif %}
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown">
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" style="max-width: 350px;">
                         <li><h6 class="dropdown-header">Notificaciones</h6></li>
-                        <li><a class="dropdown-item" href="#"><small>Nueva transacción pendiente</small></a></li>
-                        <li><a class="dropdown-item" href="#"><small>Estado de cuenta cargado</small></a></li>
-                        <li><a class="dropdown-item" href="#"><small>Discrepancia detectada</small></a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-center" href="#">Ver todas</a></li>
+                        {% if unread_notifications %}
+                            {% for notification in unread_notifications %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'mark_notification_read' notification.id %}">
+                                    <small>
+                                        {% if notification.type == 'error' %}
+                                            <span class="text-danger"><i class="bi bi-exclamation-circle"></i></span>
+                                        {% elif notification.type == 'warning' %}
+                                            <span class="text-warning"><i class="bi bi-exclamation-triangle"></i></span>
+                                        {% else %}
+                                            <span class="text-info"><i class="bi bi-info-circle"></i></span>
+                                        {% endif %}
+                                        {{ notification.content|truncatechars:50 }}
+                                    </small>
+                                </a>
+                            </li>
+                            {% endfor %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-center" href="{% url 'mark_all_notifications_read' %}">Marcar todas como leídas</a></li>
+                        {% else %}
+                            <li><a class="dropdown-item text-center text-muted" href="#">No hay notificaciones nuevas</a></li>
+                        {% endif %}
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-circle"></i> {{ user.username }}
+                        <i class="bi bi-person-circle"></i> {{ user.get_full_name|default:user.username }}
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Perfil</a></li>

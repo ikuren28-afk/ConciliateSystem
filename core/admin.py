@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.models import User, Group
 from .models import Role, Office, BankAccount, Operation, BankStatement, BankStatementTransaction, Notification, AuditLog, TransactionChangeHistory
 
 
@@ -71,3 +72,9 @@ class TransactionChangeHistoryAdmin(admin.ModelAdmin):
     search_fields = ['transaction__id', 'field_changed', 'user__username']
     list_filter = ['changed_at']
     readonly_fields = ['changed_at']
+
+
+# Configuración personalizada del admin
+admin.site.site_header = 'Sistema de Conciliación Bancaria'
+admin.site.site_title = 'Conciliación Bancaria - Admin'
+admin.site.index_title = 'Panel de Administración'
