@@ -1,0 +1,69 @@
+{% extends 'core/dashboard.html' %}
+
+{% block title %}{{ action }} Oficina - Conciliación Bancaria{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-building me-2"></i>{{ action }} Oficina</h2>
+    <a href="{% url 'office_list' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver al Listado
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-file-text me-2"></i>Datos de la Oficina
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_code" class="form-label">Código <span class="text-danger">*</span></label>
+                        {{ form.code }}
+                        {% if form.code.errors %}
+                            <div class="text-danger small">{{ form.code.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_name" class="form-label">Nombre <span class="text-danger">*</span></label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-danger small">{{ form.name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-2"></i>Guardar
+                        </button>
+                        <a href="{% url 'office_list' %}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-info-circle me-2"></i>Información
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><small class="text-muted">Complete los campos obligatorios marcados con <span class="text-danger">*</span></small></p>
+                <hr>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="bi bi-key me-2 text-primary"></i>
+                        <strong>Código:</strong> Identificador único de la oficina
+                    </li>
+                    <li>
+                        <i class="bi bi-tag me-2 text-primary"></i>
+                        <strong>Nombre:</strong> Nombre descriptivo de la oficina
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
