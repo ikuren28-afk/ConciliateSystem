@@ -1,0 +1,58 @@
+{% extends 'core/dashboard.html' %}
+
+{% block title %}Oficinas - Conciliación Bancaria{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-building me-2"></i>Gestión de Oficinas</h2>
+    <a href="{% url 'office_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i>Nueva Oficina
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-list-ul me-2"></i>Listado de Oficinas
+    </div>
+    <div class="card-body">
+        {% if offices %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Fecha Creación</th>
+                        <th>Fecha Actualización</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for office in offices %}
+                    <tr>
+                        <td>{{ office.code }}</td>
+                        <td>{{ office.name }}</td>
+                        <td>{{ office.created_at|date:"d/m/Y H:i" }}</td>
+                        <td>{{ office.updated_at|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <a href="{% url 'office_edit' office.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'office_delete' office.id %}" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 3rem; color: #dee2e6;"></i>
+            <p class="text-muted mt-3">No hay oficinas registradas</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

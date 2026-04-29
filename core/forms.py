@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django import forms
 from django.contrib.auth.models import User
+from .models import Office, BankAccount, Operation
 
 
 class LoginForm(AuthenticationForm):
@@ -66,3 +67,39 @@ class CustomUserCreationForm(UserCreationForm):
             'class': 'form-control',
             'placeholder': 'Confirmar contraseña'
         })
+
+
+class OfficeForm(forms.ModelForm):
+    """Formulario para gestionar oficinas"""
+    
+    class Meta:
+        model = Office
+        fields = ['code', 'name']
+        widgets = {
+            'code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Código'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre'})
+        }
+
+
+class BankAccountForm(forms.ModelForm):
+    """Formulario para gestionar cuentas bancarias"""
+    
+    class Meta:
+        model = BankAccount
+        fields = ['code', 'name']
+        widgets = {
+            'code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Código'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre'})
+        }
+
+
+class OperationForm(forms.ModelForm):
+    """Formulario para gestionar tipos de operaciones"""
+    
+    class Meta:
+        model = Operation
+        fields = ['code', 'name']
+        widgets = {
+            'code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Código'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre'})
+        }
